@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101819">
+  <meta name="description" content="A small retro popup music experience. Bring your own audio and messages.">
+  <title>Blah Blah.exe — Popup Player</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <main class="desktop" id="desktop">
+    <div class="terminal" aria-hidden="true">
+      <div> C:\\WINDOWS\\SYSTEM32 &gt; boot_dialog.exe</div>
+      <div> loading memory... <span>OK</span></div>
+      <div> waiting for input_</div>
+      <div class="terminal-dim"> 0x0042  0x00AF  0x1001  0x0000</div>
+    </div>
+
+    <div class="desktop-label" aria-hidden="true"><span class="desktop-mark">B</span><span>BLAH_BLAH.EXE</span></div>
+
+    <section class="window welcome" id="welcome" aria-labelledby="welcomeTitle">
+      <header class="titlebar"><span class="titlebar-name"><span class="mini-app-icon">B</span> Blah Blah.exe</span><button class="close" id="closeWelcome" type="button" aria-label="Minimize welcome window">_</button></header>
+      <div class="welcome-content">
+        <div class="welcome-art" aria-hidden="true"><span class="pixel-sun"></span><span class="pixel-face">:)</span><span class="art-caption">MUSIC / MEMORY / MESSAGES</span></div>
+        <p class="eyebrow">A SMALL DESKTOP INTERRUPTION</p>
+        <h1 id="welcomeTitle">Blah Blah.exe</h1>
+        <p class="intro">A song in the background. A few words finding their way to the screen.</p>
+        <label class="file-label" for="audioFile">Choose an audio file</label>
+        <input id="audioFile" type="file" accept="audio/*">
+        <p class="file-name" id="fileName">No audio selected</p>
+        <label class="file-label secondary-file-label" for="lrcFile">Choose an .LRC lyrics file</label>
+        <input id="lrcFile" type="file" accept=".lrc,text/plain">
+        <p class="file-name" id="lrcFileName">No LRC selected</p>
+        <button class="text-button hidden" id="clearLrc" type="button">Clear lyrics file</button>
+        <p class="audio-status" id="lrcStatus" role="status">No LRC selected. Add an LRC file to synchronize lyrics; built-in popups remain available.</p>
+        <p class="audio-status" id="audioStatus" role="status">No audio selected. Audio is required for synchronization; use the demo to try popups.</p>
+        <button class="xp-button primary start-button" id="startBtn" type="button">Start with audio</button>
+        <button class="text-button" id="demoBtn" type="button">Try popup demo without audio</button>
+        <p class="hint">Audio plays only after you press Start. Choose a file you have permission to use.</p>
+      </div>
+    </section>
+
+    <section class="window popup hidden" id="popup" role="dialog" aria-modal="false" aria-labelledby="popupTitle" aria-describedby="message" aria-live="off">
+      <header class="titlebar"><span class="titlebar-name"><span class="mini-app-icon">!</span> <span id="popupTitle">Message</span></span><button class="close" id="closePopup" type="button" aria-label="Close message">×</button></header>
+      <div class="popup-content">
+        <div class="message-icon" id="messageIcon" aria-hidden="true">i</div>
+        <p class="message" id="message" aria-live="polite"></p>
+      </div>
+      <footer class="popup-footer"><button class="xp-button" id="okBtn" type="button">OK</button></footer>
+    </section>
+
+    <section class="window settings hidden" id="settings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <header class="titlebar"><span class="titlebar-name"><span class="mini-app-icon">M</span> Message editor</span><button class="close" id="closeSettings" type="button" aria-label="Close message editor">×</button></header>
+      <div class="settings-content">
+        <div class="editor-grid">
+          <form id="messageForm" class="message-form" novalidate>
+            <h2 id="settingsTitle">Message sequence</h2>
+            <label for="messageText">Message</label>
+            <textarea id="messageText" rows="3" maxlength="500" required></textarea>
+            <div class="form-row">
+              <label>Title<input id="messageTitle" maxlength="50" value="Blah Blah.exe"></label>
+              <label>Icon<input id="messageIconInput" maxlength="4" value="i" aria-label="Popup icon (short text or emoji)"></label>
+            </div>
+            <div class="form-row">
+              <label>Trigger<select id="triggerType"><option value="click">Wait for OK</option><option value="auto">At audio time</option></select></label>
+              <label id="timestampField" class="hidden">Time in seconds<input id="timestampInput" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 12.5"></label>
+            </div>
+            <label>Placement<select id="placementInput"><option value="center">Center</option><option value="upper-left">Upper left</option><option value="upper-right">Upper right</option><option value="lower-left">Lower left</option><option value="lower-right">Lower right</option></select></label>
+            <p class="form-error" id="formError" role="alert"></p>
+            <div class="form-actions"><button class="xp-button" id="clearFormBtn" type="button">Clear</button><button class="xp-button primary" id="saveMessageBtn" type="submit">Add message</button></div>
+          </form>
+          <div class="sequence-panel">
+            <div class="sequence-heading"><h2>Sequence</h2><span id="messageCount">0 messages</span></div>
+            <ol id="messageList" class="message-list"></ol>
+          </div>
+        </div>
+        <section class="lyric-editor hidden" id="lyricEditor" aria-labelledby="lyricEditorTitle">
+          <div class="sequence-heading"><h2 id="lyricEditorTitle">Mixed-mode click lines</h2><span id="lyricCount">No LRC loaded</span></div>
+          <p class="hint">In mixed mode, checked lines appear at their timestamp and wait for OK. Unchecked lines appear automatically at their timestamp.</p>
+          <ol id="lyricList" class="message-list lyric-list"></ol>
+          <details class="json-tools lyric-config-tools">
+            <summary>Click-line configuration</summary>
+            <label for="lyricConfig">Stable lyric IDs</label>
+            <textarea id="lyricConfig" rows="4" spellcheck="false" placeholder='{"clickIds":["lrc-4-1"]}'></textarea>
+            <p id="lyricConfigFeedback" class="form-error" role="status"></p>
+            <div class="form-actions"><button class="xp-button" id="exportLyricConfig" type="button">Export selection</button><button class="xp-button" id="importLyricConfig" type="button">Import selection</button></div>
+          </details>
+        </section>
+        <details class="json-tools">
+          <summary>Import / export JSON</summary>
+          <label for="jsonEditor">Message configuration</label>
+          <textarea id="jsonEditor" rows="7" spellcheck="false" aria-describedby="jsonHint"></textarea>
+          <p id="jsonHint" class="hint">Import replaces the current sequence. Export copies the current sequence into this box.</p>
+          <p id="jsonFeedback" class="form-error" role="status"></p>
+          <div class="form-actions"><button class="xp-button" id="exportBtn" type="button">Export JSON</button><button class="xp-button" id="importBtn" type="button">Import JSON</button><button class="xp-button" id="resetBtn" type="button">Reset demo</button></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="player hidden" id="player" aria-label="Audio player">
+      <div class="trackline"><span id="trackName">No audio loaded</span><span id="timeLabel">0:00 / 0:00</span></div>
+      <div class="lyric-controls">
+        <label for="lyricMode">Lyrics mode</label>
+        <select id="lyricMode"><option value="automatic">Automatic</option><option value="click">Click through</option><option value="mixed">Mixed</option></select>
+        <label class="offset-control" for="offsetInput">Offset (ms)<input id="offsetInput" type="number" step="10" value="0" inputmode="numeric"></label>
+      </div>
+      <audio id="audio" playsinline preload="metadata"></audio>
+      <label class="sr-only" for="seekBar">Seek through audio</label>
+      <input id="seekBar" class="range seek" type="range" min="0" max="0" step="0.1" value="0" disabled>
+      <div class="player-controls">
+        <button class="xp-button" id="playPause" type="button" aria-label="Play">▶ Play</button>
+        <button class="xp-button" id="restartBtn" type="button" aria-label="Restart track">↺ Restart</button>
+        <label class="volume-control" for="volumeBar">Volume <input id="volumeBar" class="range" type="range" min="0" max="1" step="0.05" value="1"></label>
+        <button class="xp-button edit-button" id="settingsBtn" type="button">✎ Edit messages</button>
+      </div>
+      <p class="player-status" id="lyricPlayerStatus" role="status">No LRC loaded. The built-in popup sequence is active.</p>
+      <p class="player-status" id="playerStatus" role="status">Waiting to start.</p>
+    </section>
+
+    <div class="taskbar">
+      <button class="start-menu" id="taskStart" type="button"><span aria-hidden="true">▣</span> Start</button>
+      <div class="taskbar-task" id="taskLabel">Blah Blah.exe</div>
+      <div class="clock" id="clock" aria-label="Current local time"></div>
+    </div>
+    <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+  </main>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
